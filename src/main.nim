@@ -1,7 +1,6 @@
-import nico
-import nico/backends/common
-import std/[fenv, os, strformat, tables]
+import nico, nico/backends/common
 import utils
+import std/[fenv, os, strformat]
 
 #[
 colors: 
@@ -31,7 +30,7 @@ const
   gui_w = 800
   gui_h = 500
   win_w = 800
-  win_h = 450
+  win_h = 470
   win_hw = win_w div 2
   win_hh = win_h div 2
   #win_r = win_w / win_h   # ==1: square, >1: rectangle (lying), <1: rectangle (standing)
@@ -58,11 +57,9 @@ proc createHunters(n: int): seq[Figure] =
     result.add createHunter((win_hw, win_h))
 
 proc move(f: var Figure, d: Direction) =
-  var dn = d
-  dn.normalize(f.velocity)
-  dn.round()
-  var
-    pos: Position = f.pos + dn
+  var 
+    d_norm = d.normalize(f.velocity).round()
+    pos: Position = f.pos + d_norm
     r: int = f.radius
   if pos.x - r < 0:
     pos.x = r
@@ -79,9 +76,14 @@ proc hunt(h: var Figure, p: Figure) =
   h.move(dir)
 
 proc flee(h: var Figure, p: Figure) =
-  let dir = toDirection(h.pos - p.pos)
-  if (h.pos + dir * h.velocity).x < 0:
-    discard
+  let
+    d_away: Direction = toDirection(h.pos - p.pos)
+    d_away_norm = d_away.normalize
+    d_middle = toDirection((win_hw, win_hh) - h.pos)
+    d_middle_norm = d_middle.normalize
+    d_sum = d_away + d_middle
+    d_sum_norm = d_away_norm + d_middle_norm
+  # TODO: do smart magic to flee from the player
 
 proc draw(f: Figure) =
   setColor(f.color)
@@ -97,6 +99,7 @@ proc keysToDirection(): Direction =
     result.y -= 1
   if key(K_DOWN) or key(K_S):
     result.y += 1
+
 
 var
   caught = false
@@ -134,14 +137,11 @@ proc gameUpdate(dt: float32) =
         return
     player.move(keysToDirection())
     for hunter in hunters.mitems:
-      #hunter.move(toDirection(player.pos - hunter.pos))
       hunter.hunt(player)
 
 proc gameDraw() =
   cls()
   if startscreen:
-    #setColor(7)
-    #setColor(mapRGB(0xff, 0xff, 0xff))
     setColor(MyColors("white"))
     printc("Press Enter To Start", win_hw, win_hh-5)
     printc(fmt"Hunters: {hunter_num}", win_hw, win_hh+5)
@@ -150,18 +150,12 @@ proc gameDraw() =
   player.draw()
   for hunter in hunters:
     hunter.draw
-  #setColor(5)
-  #setColor(mapRGB(0x30, 0x30, 0x30))
   setColor(MyColors("darkest-gray"))
   nico.boxfill(0, win_h, gui_w, gui_h-win_h)
-  #setColor(5)
-  #setColor(mapRGB(0x5f, 0x5f, 0x5f))
   setColor(MyColors("darker-gray"))
   nico.hline(0, win_h, gui_w)
 
   if caught:
-    #setColor(7)
-    #setColor(mapRGB(0xff, 0xff, 0xff))
     setColor(MyColors("white"))
     printc("You Lost! Press Enter To Replay", win_hw, win_hh-5)
     printc(fmt"Hunters: {hunter_num}", win_hw, win_hh+5)
