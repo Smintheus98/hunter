@@ -9,6 +9,8 @@ type
     pos*: Position
     radius*: int
     velocity*: float
+  HunterMode = enum
+    hunt, flee
 
 func radToDirection(rad: float): Direction
 func `+`*(p: Position, d: Direction): Position
@@ -18,6 +20,8 @@ func `-`*(a, b: Position): Position
 func `-`*(a, b: Direction): Direction
 func `*`*(s: float, d: Direction): Direction
 func `*`*(d: Direction, s: float): Direction
+func `*`*(d1, d2: Direction): float
+func dotp*(d1, d2: Direction): float
 func toDirection*(p: Position): Direction
 func norm*(d: Direction): float
 func normalize*(d: Direction, scale: float = 1.0): Direction
@@ -59,6 +63,12 @@ func `*`*(s: float, d: Direction): Direction =
 
 func `*`*(d: Direction, s: float): Direction =
   return `*`(s, d)
+
+func `*`*(d1, d2: Direction): float =
+  return dotp(d1, d2)
+
+func dotp*(d1, d2: Direction): float =
+  return d1.x*d2.x + d1.y*d2.y
 
 func `-`*(a, b: Position): Position =
   result.x = a.x - b.x
