@@ -1,4 +1,5 @@
 # hunter
 Simple 2D game written in nim using nico
 
-Not working at the moment!
+Stil under heavy Development!
+May not work as expected!
