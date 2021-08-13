@@ -15,6 +15,7 @@ func `+`*(p: Position, d: Direction): Position
 func `+`*(d: Direction, p: Position): Position
 func `+`*(d1, d2: Direction, normalize=false): Direction
 func `-`*(a, b: Position): Position
+func `-`*(a, b: Direction): Direction
 func `*`*(s: float, d: Direction): Direction
 func `*`*(d: Direction, s: float): Direction
 func toDirection*(p: Position): Direction
@@ -38,8 +39,8 @@ func radToDirection(rad: float): Direction =
     result.y = 0.0
 
 func `+`*(p: Position, d: Direction): Position =
-  result.x = d.x + d.x.int
-  result.y = d.y + d.y.int
+  result.x = p.x + d.x.int
+  result.y = p.y + d.y.int
 
 func `+`*(d: Direction, p: Position): Position =
   return `+`(p, d)
@@ -60,6 +61,10 @@ func `*`*(d: Direction, s: float): Direction =
   return `*`(s, d)
 
 func `-`*(a, b: Position): Position =
+  result.x = a.x - b.x
+  result.y = a.y - b.y
+
+func `-`*(a, b: Direction): Direction =
   result.x = a.x - b.x
   result.y = a.y - b.y
 
